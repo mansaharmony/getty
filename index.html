@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Getty - Chat with Your Personal Assistant</title>
+    <!-- Include Weavy UIKit Web -->
+    <script src="https://6c2796f5c1784affae9fe29f82d88588.weavy.io/uikit-web/weavy.js"></script>
+    <script>
+        const weavy = new Weavy();
+        // URL to your Weavy environment
+        weavy.url = "https://6c2796f5c1784affae9fe29f82d88588.weavy.io";
+        // Token factory that returns the access_token for your demo user
+        weavy.tokenFactory = async () => "wyu_NPJejXg2VJMg3uAlEpYbRovBFWIqG60bpWrJ";
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,121 +31,33 @@
         h1 {
             color: #333;
         }
-        .chat-box {
-            width: 100%;
-            height: 300px;
-            overflow-y: scroll;
-            padding: 10px;
+        /* Custom inline CSS for Weavy chat component */
+        wy-chat {
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            max-height: 400px;
+        }
+        wy-chat .weavy-message {
             background-color: #f9f9f9;
-            margin-bottom: 10px;
-            text-align: left;
-        }
-        .user-message {
-            background-color: #4CAF50;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 4px;
-            display: inline-block;
-            max-width: 70%;
-            margin-bottom: 5px;
-            text-align: left;
-        }
-        .getty-message {
-            background-color: #007bff;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 4px;
-            display: inline-block;
-            max-width: 70%;
-            margin-bottom: 5px;
-            text-align: left;
-        }
-        textarea {
-            width: calc(100% - 24px);
-            height: 60px;
             padding: 10px;
-            font-size: 16px;
-            margin-bottom: 10px;
+            margin: 5px;
             border-radius: 4px;
-            border: 1px solid #ccc;
-            resize: vertical;
         }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
+        wy-chat .weavy-message.from-me {
             background-color: #007bff;
             color: #fff;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
-            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Welcome to Getty</h1>
-        <div class="chat-box" id="chatBox">
-            <div class="getty-message">Hello! How can I assist you today?</div>
-        </div>
-        <textarea id="inputText" placeholder="Type your message..."></textarea><br>
-        <button id="sendMessageButton">Send</button>
+        <!-- Weavy Chat Component -->
+        <wy-chat uid="wyuidchat"></wy-chat>
     </div>
-
-    <script>
-        const apiKey = "sk-proj-NkkvSJyuQceahULbS5jBT3BlbkFJ1v8fdEywQrhx2OfG3TGX";
-        const openaiEndpoint = "https://api.openai.com/v1/engines/davinci/completions"; // Updated endpoint
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        };
-        const chatBox = document.getElementById('chatBox');
-        const inputText = document.getElementById('inputText');
-        const sendMessageButton = document.getElementById('sendMessageButton');
-
-        function addMessageToChat(message, sender) {
-            const messageElement = document.createElement('div');
-            messageElement.className = sender === 'user' ? 'user-message' : 'getty-message';
-            messageElement.textContent = message;
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        sendMessageButton.addEventListener('click', () => {
-            const userMessage = inputText.value.trim();
-            if (userMessage === "") {
-                alert("Please enter a message.");
-                return;
-            }
-
-            addMessageToChat(userMessage, 'user');
-
-            fetch(openaiEndpoint, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify({
-                    prompt: userMessage,
-                    max_tokens: 150
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                const gettyResponse = data.choices[0].text.trim();
-                addMessageToChat(gettyResponse, 'getty');
-            })
-            .catch(error => {
-                addMessageToChat(`Error: ${error.message}`, 'getty');
-            });
-
-            inputText.value = '';
-        });
-    </script>
 </body>
 </html>
+
