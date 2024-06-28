@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getty - Chat with Your Personal Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .chat-box {
+            width: 100%;
+            height: 300px;
+            overflow-y: scroll;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .user-message {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            max-width: 70%;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+        .getty-message {
+            background-color: #007bff;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            max-width: 70%;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+        textarea {
+            width: calc(100% - 24px);
+            height: 60px;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Getty</h1>
+        <div class="chat-box" id="chatBox">
+            <div class="getty-message">Hello! How can I assist you today?</div>
+        </div>
+        <textarea id="inputText" placeholder="Type your message..."></textarea><br>
+        <button id="sendMessageButton">Send</button>
+    </div>
+
+    <script>
+        const apiKey = "sk-proj-NkkvSJyuQceahULbS5jBT3BlbkFJ1v8fdEywQrhx2OfG3TGX";
+        const openaiEndpoint = "https://api.openai.com/v1/engines/davinci/completions"; // Updated endpoint
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        };
+        const chatBox = document.getElementById('chatBox');
+        const inputText = document.getElementById('inputText');
+        const sendMessageButton = document.getElementById('sendMessageButton');
+
+        function addMessageToChat(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.className = sender === 'user' ? 'user-message' : 'getty-message';
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        sendMessageButton.addEventListener('click', () => {
+            const userMessage = inputText.value.trim();
+            if (userMessage === "") {
+                alert("Please enter a message.");
+                return;
+            }
+
+            addMessageToChat(userMessage, 'user');
+
+            fetch(openaiEndpoint, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    prompt: userMessage,
+                    max_tokens: 150
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const gettyResponse = data.choices[0].text.trim();
+                addMessageToChat(gettyResponse, 'getty');
+            })
+            .catch(error => {
+                addMessageToChat(`Error: ${error.message}`, 'getty');
+            });
+
+            inputText.value = '';
+        });
+    </script>
+</body>
+</html>
